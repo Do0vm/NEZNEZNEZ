@@ -7,8 +7,8 @@ using static UnityEngine.Rendering.DebugUI;
 
 public class PlayerController : MonoBehaviour
 {
-    public float speed = 3f;
-    public float jumpForce = 1f;
+    public float speed = 9f;
+    public float jumpForce = 6f;
 
     // Start is called before the first frame update
     void Start()
