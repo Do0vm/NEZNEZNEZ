@@ -6,6 +6,10 @@ TagManager:
   tags:
   - Enemy
   - Land
+  - Grenade
+  - EnemyProjectile
+  - Destroy
+  - OutOfBounds
   layers:
   - Default
   - TransparentFX

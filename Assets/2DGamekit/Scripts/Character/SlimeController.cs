@@ -2,45 +2,46 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SlimeController : MonoBehaviour
+public class BossController : MonoBehaviour
 {
-    public GameObject player;
-    public float speed;
-    public float distanceBetween;
+    public GameObject projectilePrefab; // The projectile prefab
+    public Transform spawnPoint; // The point where projectiles are spawned
+    public float spawnInterval = 2f; // Time between projectile spawns
+    private bool canSpawn = false; // Flag to control spawning
 
-    private float distance;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
     void Update()
     {
-        distance = Vector2.Distance(transform.position, player.transform.position);
-
-        Vector2 direction = player.transform.position - transform.position;
-
-        direction.Normalize();
-        float angle = Mathf.Atan2(direction.y, direction.x)*Mathf.Rad2Deg;
-
-        
-
-        if (distance < distanceBetween)
+        if (canSpawn)
         {
-            transform.position = Vector2.MoveTowards(this.transform.position, player.transform.position, speed*Time.deltaTime);
-            transform.rotation = Quaternion.Euler(Vector3.forward*angle);
+            SpawnProjectile();
         }
-
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Player")|| collision.gameObject.CompareTag("Land"))
-
+        if (collision.CompareTag("Player"))
         {
-            Destroy(gameObject);
+            canSpawn = true; // Enable spawning when player enters the trigger
         }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player"))
+        {
+            canSpawn = false; // Disable spawning when player exits the trigger
+        }
+    }
+
+    private void SpawnProjectile()
+    {
+        Instantiate(projectilePrefab, spawnPoint.position, Quaternion.identity); // Spawn the projectile
+        canSpawn = false; // Disable spawning after one spawn
+        Invoke(nameof(ResetSpawn), spawnInterval); // Reset spawning after the interval
+    }
+
+    private void ResetSpawn()
+    {
+        canSpawn = true; // Re-enable spawning
     }
 }

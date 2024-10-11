@@ -1,82 +1,78 @@
-using BTAI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
-
 
 public class PlayerController : MonoBehaviour
 {
     public float speed = 9f;
     public float jumpForce = 6f;
+    private bool isGrounded = true; // Track whether the player is grounded
+
+    private Animator animator;
+    private SpriteRenderer spriteRenderer;
+    private Rigidbody2D rb;
 
     // Start is called before the first frame update
     void Start()
     {
-        GetComponent<Animator>();
+        // Cache the components to avoid calling GetComponent() every frame
+        animator = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        rb = GetComponent<Rigidbody2D>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        bool WhileJumping = false;
-        GetComponent<Animator>().SetBool("HasGun", false);
-        if (GetComponent<Animator>().GetBool("HasGun") != true )
-      {
-        GetComponent<Animator>().SetBool("Crouch", false);
-        GetComponent<Animator>().SetBool("Jump", false);
-        GetComponent<Animator>().SetBool("Damage", false);
-      
+        // Check if the player is grounded (simple example: check if vertical velocity is zero)
+        isGrounded = Mathf.Abs(rb.velocity.y) < 0.001f;
 
-            if (Input.GetKey(KeyCode.D))
+        // Handle movement and flipping
+        HandleMovement();
+
+        // Handle jumping
+        if (isGrounded && Input.GetKeyDown(KeyCode.Space))
         {
-
-            GetComponent<SpriteRenderer>().flipX = false;
-            GetComponent<Animator>().SetBool("Walking", true);
-            transform.position += new Vector3(speed * Time.deltaTime, 0, 0);
+            Jump();
         }
 
-
-
-
-        else if (Input.GetKey(KeyCode.Q))
-        {
-            GetComponent<SpriteRenderer>().flipX = true;
-            GetComponent<Animator>().SetBool("Walking", true);
-            transform.position += new Vector3(-speed * Time.deltaTime, 0, 0);
-        }
-            else
-            {
-                GetComponent<Animator>().SetBool("Walking", false);
-            }
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-                GetComponent<Animator>().SetTrigger("Jump");
-                GetComponent<Rigidbody2D>().velocity = new Vector2(0, jumpForce);
-
-
-
-        }
+        // Handle crouching
         if (Input.GetKeyDown(KeyCode.C))
-            {
-                GetComponent<Animator>().SetTrigger("Crouch");
-
-            }
-
-
-        }
-
-
-        else
         {
-           
-
-
+            Crouch();
         }
-
     }
 
+    void HandleMovement()
+    {
+        float moveInput = Input.GetAxisRaw("Horizontal");
 
-    
+        if (moveInput > 0) // Moving right
+        {
+            spriteRenderer.flipX = false;
+            animator.SetBool("Walking", true);
+            transform.position += new Vector3(speed * Time.deltaTime, 0, 0);
+        }
+        else if (moveInput < 0) // Moving left
+        {
+            spriteRenderer.flipX = true;
+            animator.SetBool("Walking", true);
+            transform.position += new Vector3(-speed * Time.deltaTime, 0, 0);
+        }
+        else
+        {
+            animator.SetBool("Walking", false); // Not moving
+        }
+    }
+
+    void Jump()
+    {
+        animator.SetTrigger("Jump");
+        rb.velocity = new Vector2(rb.velocity.x, jumpForce); // Preserve horizontal velocity while jumping
+    }
+
+    void Crouch()
+    {
+        animator.SetTrigger("Crouch");
+    }
 }
